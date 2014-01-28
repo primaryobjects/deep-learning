@@ -1,0 +1,14 @@
+*.cache
+*.dll
+*.pdb
+*.txt
+!README.txt
+!HELP.txt
+*.suo
+*.force
+*/obj/Debug/*
+*/obj/Release/*
+*/bin/Debug/*
+*/bin/Release/*
+TestResults/*
+packages/*
