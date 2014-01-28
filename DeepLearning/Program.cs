@@ -17,24 +17,14 @@ namespace DeepLearning
     {
         static void Main(string[] args)
         {
-            // We'll use a simple XOR function as input.
-            double[][] inputs = new double[][] { 
-                new double[] { 0, 0 },
-                new double[] { 0, 1 },
-                new double[] { 1, 0 },
-                new double[] { 1, 1 }
-            };
+            double[][] inputs;
+            double[][] outputs;
 
-            // XOR output, cooresponding to the input.
-            double[][] outputs = new double[][] {
-                new double[] { 1, 0 },
-                new double[] { 0, 1 },
-                new double[] { 0, 1 },
-                new double[] { 0, 1 }
-            };
+            // Load ascii digits dataset.
+            inputs = DataManager.Load(@"../../../data/data.txt", out outputs);
 
             // Setup the deep belief network and initialize with random weights.
-            DeepBeliefNetwork network = new DeepBeliefNetwork(2, 2);
+            DeepBeliefNetwork network = new DeepBeliefNetwork(inputs.First().Length, 20, 10);
             new GaussianWeights(network, 0.1).Randomize();
             network.UpdateVisibleWeights();
 
@@ -62,7 +52,7 @@ namespace DeepLearning
             {
                 teacher.LayerIndex = layerIndex;
                 layerData = teacher.GetLayerInput(batches);
-                for (int i = 0; i < 500; i++)
+                for (int i = 0; i < 100; i++)
                 {
                     double error = teacher.RunEpoch(layerData) / inputs.Length;
                     if (i % 10 == 0)
@@ -80,7 +70,7 @@ namespace DeepLearning
             };
 
             // Run supervised learning.
-            for (int i = 0; i < 5000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 double error = teacher2.RunEpoch(inputs, outputs) / inputs.Length;
                 if (i % 10 == 0)
@@ -94,7 +84,7 @@ namespace DeepLearning
             for (int i = 0; i < inputs.Length; i++)
             {
                 double[] outputValues = network.Compute(inputs[i]);
-                if (FormatOutputResult(outputValues) == FormatOutputResult(outputs[i]))
+                if (DataManager.FormatOutputResult(outputValues) == DataManager.FormatOutputResult(outputs[i]))
                 {
                     correct++;
                 }
@@ -104,43 +94,5 @@ namespace DeepLearning
             Console.Write("Press any key to quit ..");
             Console.ReadKey();
         }
-
-        #region Utility Methods
-
-        /// <summary>
-        /// Converts a numeric output label (0, 1, 2, 3, etc) to its cooresponding array of doubles, where all values are 0 except for the index matching the label (ie., if the label is 2, the output is [0, 0, 1, 0, 0, ...]).
-        /// </summary>
-        /// <param name="label">double</param>
-        /// <returns>double[]</returns>
-        private static double[] FormatOutputVector(double label)
-        {
-            double[] output = new double[10];
-
-            for (int i = 0; i < output.Length; i++)
-            {
-                if (i == label)
-                {
-                    output[i] = 1;
-                }
-                else
-                {
-                    output[i] = 0;
-                }
-            }
-
-            return output;
-        }
-
-        /// <summary>
-        /// Finds the largest output value in an array and returns its index. This allows for sequential classification from the outputs of a neural network (ie., if output at index 2 is the largest, the classification is class "3" (zero-based)).
-        /// </summary>
-        /// <param name="output">double[]</param>
-        /// <returns>double</returns>
-        private static double FormatOutputResult(double[] output)
-        {
-            return output.ToList().IndexOf(output.Max());
-        }
-
-        #endregion
     }
 }
