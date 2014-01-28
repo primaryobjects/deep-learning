@@ -62,7 +62,7 @@ namespace DeepLearning
             {
                 teacher.LayerIndex = layerIndex;
                 layerData = teacher.GetLayerInput(batches);
-                for (int i = 0; i < 500; i++)
+                for (int i = 0; i < 100; i++)
                 {
                     double error = teacher.RunEpoch(layerData) / inputs.Length;
                     if (i % 10 == 0)
@@ -80,7 +80,7 @@ namespace DeepLearning
             };
 
             // Run supervised learning.
-            for (int i = 0; i < 5000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 double error = teacher2.RunEpoch(inputs, outputs) / inputs.Length;
                 if (i % 10 == 0)
