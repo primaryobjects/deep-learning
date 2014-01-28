@@ -33,8 +33,8 @@ namespace DeepLearning
                 new double[] { 0 }
             };
 
-            // Setup the deep belief network and initialize with random weights.
-            DeepBeliefNetwork network = new DeepBeliefNetwork(inputs.First().Length, 3, 1);
+            // Setup the deep belief network (2 inputs, 3 hidden, 1 output) and initialize with random weights.
+            DeepBeliefNetwork network = new DeepBeliefNetwork(2, 3, 1);
             new GaussianWeights(network, 0.1).Randomize();
             network.UpdateVisibleWeights();
 
