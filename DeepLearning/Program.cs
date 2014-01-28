@@ -27,14 +27,14 @@ namespace DeepLearning
 
             // XOR output, cooresponding to the input.
             double[][] outputs = new double[][] {
-                new double[] { 1, 0 },
-                new double[] { 0, 1 },
-                new double[] { 0, 1 },
-                new double[] { 0, 1 }
+                new double[] { 0 },
+                new double[] { 1 },
+                new double[] { 1 },
+                new double[] { 0 }
             };
 
             // Setup the deep belief network and initialize with random weights.
-            DeepBeliefNetwork network = new DeepBeliefNetwork(inputs.First().Length, 1, 2);
+            DeepBeliefNetwork network = new DeepBeliefNetwork(inputs.First().Length, 1, 1);
             new GaussianWeights(network, 0.1).Randomize();
             network.UpdateVisibleWeights();
 
