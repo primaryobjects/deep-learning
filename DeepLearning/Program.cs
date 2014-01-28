@@ -19,15 +19,23 @@ namespace DeepLearning
         {
             double[][] inputs;
             double[][] outputs;
+            double[][] testInputs;
+            double[][] testOutputs;
 
             // Load ascii digits dataset.
             inputs = DataManager.Load(@"../../../data/data.txt", out outputs);
 
+            // The first 500 data rows will be for training. The rest will be for testing.
+            testInputs = inputs.Skip(500).ToArray();
+            testOutputs = outputs.Skip(500).ToArray();
+            inputs = inputs.Take(500).ToArray();
+            outputs = outputs.Take(500).ToArray();
+
             // Setup the deep belief network and initialize with random weights.
-            DeepBeliefNetwork network = new DeepBeliefNetwork(inputs.First().Length, 20, 10);
+            DeepBeliefNetwork network = new DeepBeliefNetwork(inputs.First().Length, 10, 10);
             new GaussianWeights(network, 0.1).Randomize();
             network.UpdateVisibleWeights();
-
+            
             // Setup the learning algorithm.
             DeepBeliefNetworkLearning teacher = new DeepBeliefNetworkLearning(network)
             {
@@ -47,12 +55,12 @@ namespace DeepLearning
             // Learning data for the specified layer.
             double[][][] layerData;
 
-            // Unsupervised learning on each layer.
-            for (int layerIndex = 0; layerIndex < network.Machines.Count; layerIndex++)
+            // Unsupervised learning on each hidden layer, except for the output layer.
+            for (int layerIndex = 0; layerIndex < network.Machines.Count - 1; layerIndex++)
             {
                 teacher.LayerIndex = layerIndex;
                 layerData = teacher.GetLayerInput(batches);
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < 200; i++)
                 {
                     double error = teacher.RunEpoch(layerData) / inputs.Length;
                     if (i % 10 == 0)
@@ -70,7 +78,7 @@ namespace DeepLearning
             };
 
             // Run supervised learning.
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 500; i++)
             {
                 double error = teacher2.RunEpoch(inputs, outputs) / inputs.Length;
                 if (i % 10 == 0)
@@ -83,8 +91,8 @@ namespace DeepLearning
             int correct = 0;
             for (int i = 0; i < inputs.Length; i++)
             {
-                double[] outputValues = network.Compute(inputs[i]);
-                if (DataManager.FormatOutputResult(outputValues) == DataManager.FormatOutputResult(outputs[i]))
+                double[] outputValues = network.Compute(testInputs[i]);
+                if (DataManager.FormatOutputResult(outputValues) == DataManager.FormatOutputResult(testOutputs[i]))
                 {
                     correct++;
                 }
