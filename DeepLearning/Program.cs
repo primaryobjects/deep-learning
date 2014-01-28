@@ -34,7 +34,7 @@ namespace DeepLearning
             };
 
             // Setup the deep belief network and initialize with random weights.
-            DeepBeliefNetwork network = new DeepBeliefNetwork(2, 2);
+            DeepBeliefNetwork network = new DeepBeliefNetwork(inputs.First().Length, 1, 2);
             new GaussianWeights(network, 0.1).Randomize();
             network.UpdateVisibleWeights();
 
@@ -57,8 +57,8 @@ namespace DeepLearning
             // Learning data for the specified layer.
             double[][][] layerData;
 
-            // Unsupervised learning on each layer.
-            for (int layerIndex = 0; layerIndex < network.Machines.Count; layerIndex++)
+            // Unsupervised learning on each hidden layer, except for the output.
+            for (int layerIndex = 0; layerIndex < network.Machines.Count - 1; layerIndex++)
             {
                 teacher.LayerIndex = layerIndex;
                 layerData = teacher.GetLayerInput(batches);
