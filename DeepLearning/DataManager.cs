@@ -54,7 +54,7 @@ namespace DeepLearning
                                 else
                                 {
                                     // Read output label.
-                                    output.Add(FormatOutputVector(Double.Parse(ch.ToString())));
+                                    output.Add(FormatOutputVector(Double.Parse(ch.ToString()), 10));
 
                                     // Set flag to read inputs for next row.
                                     readOutput = false;
@@ -78,10 +78,11 @@ namespace DeepLearning
         /// Converts a numeric output label (0, 1, 2, 3, etc) to its cooresponding array of doubles, where all values are 0 except for the index matching the label (ie., if the label is 2, the output is [0, 0, 1, 0, 0, ...]).
         /// </summary>
         /// <param name="label">double</param>
+        /// <param name="classCount">int - number of unique classes (ie., 10 for digits 0-9, 2 for true or false, etc).</param>
         /// <returns>double[]</returns>
-        public static double[] FormatOutputVector(double label)
+        public static double[] FormatOutputVector(double label, int classCount)
         {
-            double[] output = new double[10];
+            double[] output = new double[classCount];
 
             for (int i = 0; i < output.Length; i++)
             {

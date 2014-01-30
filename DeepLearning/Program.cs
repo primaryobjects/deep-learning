@@ -75,12 +75,12 @@ namespace DeepLearning
             ReadData(path, count, out inputs, out intOutputs, new EndStringEndLabelParser());
             
             // Format output as double[][].
-            outputs = intOutputs.Select(o => DataManager.FormatOutputVector((double)o)).ToArray();
+            outputs = intOutputs.Select(o => DataManager.FormatOutputVector((double)o, _classCount)).ToArray();
 
             if (network == null)
             {
                 // Training.
-                network = DeepBeliefNetwork.Load(@"../../../data/network.dat");/* new DeepBeliefNetwork(inputs.First().Length, 100, 100, 100, 100, 2);
+                network = DeepBeliefNetwork.Load("../../../data/network.dat"); /*new DeepBeliefNetwork(inputs.First().Length, 100, 100, 100, 100, outputs.First().Length);
                 new NguyenWidrow(network).Randomize();
                 network.UpdateVisibleWeights();
                 network.Save(@"../../../data/network.dat");*/
