@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{A71E9C
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MLParser", "MLParser\MLParser.csproj", "{65C6935B-C55F-4208-88C8-61574DAD1D7C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,6 +24,10 @@ Global
 		{B06BDCBB-94F7-49F2-B7A6-D9D472F9179D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B06BDCBB-94F7-49F2-B7A6-D9D472F9179D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B06BDCBB-94F7-49F2-B7A6-D9D472F9179D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65C6935B-C55F-4208-88C8-61574DAD1D7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65C6935B-C55F-4208-88C8-61574DAD1D7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65C6935B-C55F-4208-88C8-61574DAD1D7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65C6935B-C55F-4208-88C8-61574DAD1D7C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

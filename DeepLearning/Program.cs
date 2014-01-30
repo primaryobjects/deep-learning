@@ -18,17 +18,31 @@ using Accord.MachineLearning.VectorMachines.Learning;
 using Accord.Statistics.Kernels;
 using MLParser.Interface;
 using System.Diagnostics;
+using System.Configuration;
 
 namespace DeepLearning
 {
     class Program
     {
+        #region App.Config Values
+
+        private static int _pixelCount = Int32.Parse(ConfigurationManager.AppSettings["Width"]) * Int32.Parse(ConfigurationManager.AppSettings["Height"]);
+        private static int _classCount = Int32.Parse(ConfigurationManager.AppSettings["ClassCount"]);
+        private static int _trainCount = Int32.Parse(ConfigurationManager.AppSettings["TrainCount"]);
+        private static int _epochCount = Int32.Parse(ConfigurationManager.AppSettings["EpochCount"]);
+        private static double _sigma = Double.Parse(ConfigurationManager.AppSettings["Sigma"]);
+        private static string _trainPath = ConfigurationManager.AppSettings["TrainPath"];
+        private static string _cvPath = ConfigurationManager.AppSettings["CvPath"];
+        private static string _testPath = ConfigurationManager.AppSettings["TestPath"];
+
+        #endregion
+
         static void Main(string[] args)
         {
             Console.WriteLine("-= Training =-");
-            var network = RunDNN(@"../../../data/catsdogs-train.csv", 100, 10);
+            var network = RunDNN(_trainPath, _trainCount, _epochCount);
             Console.WriteLine("-= Cross Validation =-");
-            RunDNN(@"../../../data/catsdogs-cv.csv", 100, 10, network);
+            RunDNN(_cvPath, _trainCount, _epochCount, network);
 
             /*for (int count = 200; count < 4000; count += 200)
             {
@@ -47,7 +61,7 @@ namespace DeepLearning
         /// Core machine learning method for parsing csv data, training the network, and calculating the accuracy.
         /// </summary>
         /// <param name="path">string - path to csv file (training, csv, test).</param>
-        /// <param name="count">int - max number of rows to process. This is useful for preparing learning curves, by using gradually increasing values. Use Int32.MaxValue to read all rows.</param>
+        /// <param name="count">int - max number of rows to process. This is useful for preparing learning curves, by using gradually increasing values. Use 0 to read all rows.</param>
         /// <param name="epochs">int - max number of epochs per layer.</param>
         /// <param name="network">DeepBeliefNetwork - Leave null for initial training.</param>
         /// <returns>DeepBeliefNetwork</returns>
@@ -147,7 +161,7 @@ namespace DeepLearning
         /// Core machine learning method for parsing csv data, training the svm, and calculating the accuracy.
         /// </summary>
         /// <param name="path">string - path to csv file (training, csv, test).</param>
-        /// <param name="count">int - max number of rows to process. This is useful for preparing learning curves, by using gradually increasing values. Use Int32.MaxValue to read all rows.</param>
+        /// <param name="count">int - max number of rows to process. This is useful for preparing learning curves, by using gradually increasing values. Use 0 to read all rows.</param>
         /// <param name="machine">MulticlassSupportVectorMachine - Leave null for initial training.</param>
         /// <returns>MulticlassSupportVectorMachine</returns>
         private static MulticlassSupportVectorMachine RunSvm(string path, int count, MulticlassSupportVectorMachine machine = null)
@@ -164,7 +178,7 @@ namespace DeepLearning
                 MulticlassSupportVectorLearning teacher = null;
 
                 // Create the svm.
-                machine = new MulticlassSupportVectorMachine(1225, new Gaussian(4), 2);
+                machine = new MulticlassSupportVectorMachine(_pixelCount, new Gaussian(_sigma), _classCount);
                 teacher = new MulticlassSupportVectorLearning(machine, inputs, outputs);
                 teacher.Algorithm = (svm, classInputs, classOutputs, i, j) => new SequentialMinimalOptimization(svm, classInputs, classOutputs) { CacheSize = 0 };
 
