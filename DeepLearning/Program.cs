@@ -30,6 +30,7 @@ namespace DeepLearning
         private static int _classCount = Int32.Parse(ConfigurationManager.AppSettings["ClassCount"]);
         private static int _trainCount = Int32.Parse(ConfigurationManager.AppSettings["TrainCount"]);
         private static int _epochCount = Int32.Parse(ConfigurationManager.AppSettings["EpochCount"]);
+        private static int _hiddenNeuronCount = Int32.Parse(ConfigurationManager.AppSettings["HiddenNeuronCount"]);
         private static double _sigma = Double.Parse(ConfigurationManager.AppSettings["Sigma"]);
         private static string _trainPath = ConfigurationManager.AppSettings["TrainPath"];
         private static string _cvPath = ConfigurationManager.AppSettings["CvPath"];
@@ -80,10 +81,10 @@ namespace DeepLearning
             if (network == null)
             {
                 // Training.
-                network = DeepBeliefNetwork.Load("../../../data/network.dat"); /*new DeepBeliefNetwork(inputs.First().Length, 100, 100, 100, 100, outputs.First().Length);
+                network = new DeepBeliefNetwork(inputs.First().Length, _hiddenNeuronCount, _hiddenNeuronCount, _hiddenNeuronCount, _hiddenNeuronCount, outputs.First().Length);
                 new NguyenWidrow(network).Randomize();
                 network.UpdateVisibleWeights();
-                network.Save(@"../../../data/network.dat");*/
+                network.Save(@"../../../data/network.dat");
 
                 // Setup the learning algorithm.
                 DeepBeliefNetworkLearning teacher = new DeepBeliefNetworkLearning(network)
@@ -118,7 +119,11 @@ namespace DeepLearning
                         if (i % 10 == 0)
                         {
                             TimeSpan timeSpan = DateTime.Now - epochStart;
-                            Console.WriteLine(i + ", Error = " + error + ", " + Math.Round(timeSpan.TotalMinutes) + "m (" + Math.Round(timeSpan.TotalSeconds) + "s)");
+							int epochsRemainingByTen = (int)Math.Round((double)(epochs - i) / (double)10);
+							double minutesRemaining = epochsRemainingByTen * timeSpan.TotalMinutes;
+							DateTime finishTime = DateTime.Now + TimeSpan.FromMinutes(minutesRemaining);
+							
+                            Console.WriteLine(i + ", Error = " + error + ", " + Math.Round(timeSpan.TotalMinutes) + "m (" + Math.Round(timeSpan.TotalSeconds) + "s), eta " + finishTime.ToShortTimeString());
                             epochStart = DateTime.Now;
                         }
                     }
