@@ -29,7 +29,8 @@ namespace DeepLearning
         private static int _pixelCount = Int32.Parse(ConfigurationManager.AppSettings["Width"]) * Int32.Parse(ConfigurationManager.AppSettings["Height"]);
         private static int _classCount = Int32.Parse(ConfigurationManager.AppSettings["ClassCount"]);
         private static int _trainCount = Int32.Parse(ConfigurationManager.AppSettings["TrainCount"]);
-        private static int _epochCount = Int32.Parse(ConfigurationManager.AppSettings["EpochCount"]);
+        private static int _hiddenEpochCount = Int32.Parse(ConfigurationManager.AppSettings["HiddenEpochCount"]);
+        private static int _fineTuneEpochCount = Int32.Parse(ConfigurationManager.AppSettings["FineTuneEpochCount"]);
         private static int _hiddenNeuronCount = Int32.Parse(ConfigurationManager.AppSettings["HiddenNeuronCount"]);
         private static double _sigma = Double.Parse(ConfigurationManager.AppSettings["Sigma"]);
         private static string _trainPath = ConfigurationManager.AppSettings["TrainPath"];
@@ -41,9 +42,9 @@ namespace DeepLearning
         static void Main(string[] args)
         {
             Console.WriteLine("-= Training =-");
-            var network = RunDNN(_trainPath, _trainCount, _epochCount);
+            var network = RunDNN(_trainPath, _trainCount, _hiddenEpochCount, _fineTuneEpochCount);
             Console.WriteLine("-= Cross Validation =-");
-            RunDNN(_cvPath, _trainCount, _epochCount, network);
+            RunDNN(_cvPath, _trainCount, _hiddenEpochCount, _fineTuneEpochCount, network);
 
             /*for (int count = 200; count < 4000; count += 200)
             {
@@ -63,14 +64,20 @@ namespace DeepLearning
         /// </summary>
         /// <param name="path">string - path to csv file (training, csv, test).</param>
         /// <param name="count">int - max number of rows to process. This is useful for preparing learning curves, by using gradually increasing values. Use 0 to read all rows.</param>
-        /// <param name="epochs">int - max number of epochs per layer.</param>
+        /// <param name="hiddenEpochs">int - max number of epochs per hidden layer (unsupervised).</param>
+        /// <param name="fineTuneEpochs">int - max number of epochs over entire network during fine-tuning (supervised). Set to 0 to be the same as hiddenEpochs.</param>
         /// <param name="network">DeepBeliefNetwork - Leave null for initial training.</param>
         /// <returns>DeepBeliefNetwork</returns>
-        private static DeepBeliefNetwork RunDNN(string path, int count, int epochs, DeepBeliefNetwork network = null)
+        private static DeepBeliefNetwork RunDNN(string path, int count, int hiddenEpochs, int fineTuneEpochs = 0, DeepBeliefNetwork network = null)
         {
             double[][] inputs;
             double[][] outputs;
             int[] intOutputs;
+
+            if (fineTuneEpochs == 0)
+            {
+                fineTuneEpochs = hiddenEpochs;
+            }
 
             // Parse the csv file to get inputs and outputs.
             ReadData(path, count, out inputs, out intOutputs, new EndStringEndLabelParser());
@@ -84,7 +91,7 @@ namespace DeepLearning
                 network = new DeepBeliefNetwork(inputs.First().Length, _hiddenNeuronCount, _hiddenNeuronCount, _hiddenNeuronCount, _hiddenNeuronCount, outputs.First().Length);
                 new NguyenWidrow(network).Randomize();
                 network.UpdateVisibleWeights();
-                network.Save(@"../../../data/network.dat");
+                network.Save(@"../../../data/network1.dat");
 
                 // Setup the learning algorithm.
                 DeepBeliefNetworkLearning teacher = new DeepBeliefNetworkLearning(network)
@@ -113,14 +120,14 @@ namespace DeepLearning
                 {
                     teacher.LayerIndex = layerIndex;
                     layerData = teacher.GetLayerInput(batches);
-                    for (int i = 0; i < epochs; i++)
+                    for (int i = 0; i < hiddenEpochs; i++)
                     {
                         double error = teacher.RunEpoch(layerData) / inputs.Length;
-                        if (i % 10 == 0)
+                        if (i % 2 == 0)
                         {
                             TimeSpan timeSpan = DateTime.Now - epochStart;
-							int epochsRemainingByTen = (int)Math.Round((double)(epochs - i) / (double)10);
-							double minutesRemaining = epochsRemainingByTen * timeSpan.TotalMinutes;
+							int epochsRemainingByCount = (int)Math.Round((double)(hiddenEpochs - i) / (double)2);
+							double minutesRemaining = epochsRemainingByCount * timeSpan.TotalMinutes;
 							DateTime finishTime = DateTime.Now + TimeSpan.FromMinutes(minutesRemaining);
 							
                             Console.WriteLine(i + ", Error = " + error + ", " + Math.Round(timeSpan.TotalMinutes) + "m (" + Math.Round(timeSpan.TotalSeconds) + "s), eta " + finishTime.ToShortTimeString());
@@ -128,6 +135,8 @@ namespace DeepLearning
                         }
                     }
                 }
+
+                network.Save(@"../../../data/network2.dat");
 
                 // Supervised learning on entire network, to provide output classification.
                 var teacher2 = new BackPropagationLearning(network)
@@ -139,16 +148,22 @@ namespace DeepLearning
                 epochStart = DateTime.Now;
 
                 // Run supervised learning.
-                for (int i = 0; i < epochs; i++)
+                for (int i = 0; i < fineTuneEpochs; i++)
                 {
                     double error = teacher2.RunEpoch(inputs, outputs) / inputs.Length;
-                    if (i % 10 == 0)
+                    if (i % 2 == 0)
                     {
                         TimeSpan timeSpan = DateTime.Now - epochStart;
-                        Console.WriteLine(i + ", Error = " + error + ", " + Math.Round(timeSpan.TotalMinutes) + "m (" + Math.Round(timeSpan.TotalSeconds) + "s)");
+                        int epochsRemainingByCount = (int)Math.Round((double)(fineTuneEpochs - i) / (double)2);
+                        double minutesRemaining = epochsRemainingByCount * timeSpan.TotalMinutes;
+                        DateTime finishTime = DateTime.Now + TimeSpan.FromMinutes(minutesRemaining);
+
+                        Console.WriteLine(i + ", Error = " + error + ", " + Math.Round(timeSpan.TotalMinutes) + "m (" + Math.Round(timeSpan.TotalSeconds) + "s), eta " + finishTime.ToShortTimeString());
                         epochStart = DateTime.Now;
                     }
                 }
+
+                network.Save(@"../../../data/network3.dat");
 
                 TimeSpan runTime = DateTime.Now - startTime;
                 Console.WriteLine("Training completed after " + runTime.TotalMinutes + "m.");
