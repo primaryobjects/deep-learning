@@ -134,6 +134,12 @@ namespace DeepLearning
                             epochStart = DateTime.Now;
                         }
                     }
+
+                    if (layerIndex == 0)
+                    {
+                        // Save a copy of the first layer unsupervised trained, so we can continue unsupervised training if we want.
+                        network.Save(@"../../../data/network1a.dat");
+                    }
                 }
 
                 network.Save(@"../../../data/network2.dat");

@@ -74,5 +74,27 @@ namespace DeepLearning
 
             return inputs.Length;
         }
+
+        /// <summary>
+        /// Calculates the output for the neural network and saves each result to a text file, one per line.
+        /// </summary>
+        /// <param name="machine">DeepBeliefNetwork</param>
+        /// <param name="inputs">double[][]</param>
+        /// <param name="path">string</param>
+        /// <returns>int - number of rows processed</returns>
+        public static int SaveOutput(DeepBeliefNetwork network, double[][] inputs, string path)
+        {
+            File.AppendAllText(path, "ImageId,Label\r\n");
+
+            for (int i = 0; i < inputs.Length; i++)
+            {
+                double[] outputValues = network.Compute(inputs[i]);
+                double output = DataManager.FormatOutputResult(outputValues);
+                
+                File.AppendAllText(path, (i + 1) + "," + output.ToString() + "\r\n");
+            }
+
+            return inputs.Length;
+        }
     }
 }
